@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>OttoDock Comm</title>
+
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link href="mcp.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="container text-center">
+
+      <div class="starter-template">
+        <h2>OttoDock Comm</h2>
+        <h4>Movement Control Program (MCP)</h4>
+        <p class="lead" style="color: blue"><span style="font-weight: bold">Master Power</span> On<br>
+        Then <span style="font-weight: bold">Select In or Out</span><br>
+        Finally Use the <span style="font-weight: bold">All Together</span> Switch or individual switches as desired.
+        </p>
+      </div>
+
+<!--
+The nice css checkboxes as switches courtesy of
+https://www.abeautifulsite.net/bootstrap-4-switches
+Usage:
+
+  <span class="switch">
+    <input type="checkbox" class="switch" id="switch-id">
+    <label for="switch-id">Small switch</label>
+  </span>
+  
+Notes:
+
+ - The label must directly proceed input
+ - The input must have an id
+ - The label must have for="<id>"
+
+-->
+
+<div class="form-group">  
+  <span class="switch switch-lg">
+    <input type="checkbox" id="master-power">
+    <label for="master-power">Master Power</label>
+  </span>
+    <span class="switch switch-lg">
+    <input type="checkbox" id="in-out">
+    <label for="in-out">In <span style="font-size:1.5em">&harr;</span> Out</label>
+  </span>
+
+</div>
+
+<div class="card card-body bg-light m-3">
+<div class="form-group">  
+  <span class="switch switch-lg">
+    <input type="checkbox" id="left-winch">
+    <label for="left-winch">Left Winch</label>
+  </span>
+    <span class="switch switch-lg">
+    <input type="checkbox" id="right-winch">
+    <label for="right-winch">Right Winch</label>
+  </span>
+</div>
+
+<div class="form-group">
+  <span class="switch switch-lg">
+    <input type="checkbox" class="switch" id="murray">
+    <label for="murray">Murray</label>
+  </span>
+</div>  
+  
+</div>
+
+<div class="form-group">
+  <span class="switch switch-lg">
+    <input type="checkbox" class="switch" id="all-together">
+    <label for="all-together">All Together</label>
+  </span>
+</div>    
+
+</div><!-- /.container -->
+
+    <!-- Bootstrap core JavaScript ================================ -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>    
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script>
+
+	$(document).ready(function () {
+        console.log("Got JQuery!");  
+        $('#master-power').click(masterSwitchToggle);  	
+        $('#in-out').click(inOutToggle);  	
+        $('#left-winch').click(leftWinchToggle);  	
+        $('#right-winch').click(rightWinchToggle);  
+        $('#murray').click(murrayToggle);  
+        $('#all-together').click(allTogetherToggle); 
+        // Disable movement controls to start off, until Master power is applied 
+        setMovementControlsEnabled(false);
+        console.log("Controls Initialized");  
+    });
+    
+    const MASTER_POWER = "masterPower";
+    const DIRECTION = "direction";
+    const LEFT_WINCH = "leftWinch";
+    const RIGHT_WINCH = "rightWinch";
+    const MURRAY = "murray";
+    
+    function masterSwitchToggle() {
+    	var masterPower = $("#master-power").is(":checked");
+    	console.log("Master Power Toggled " + masterPower);
+    	sendMcpCommand(MASTER_POWER, masterPower);
+    	setMovementControlsEnabled(masterPower);
+    }
+    
+    function setMovementControlsEnabled(isEnabled) {
+    	var isDisabled = !isEnabled
+        $('#left-winch').attr('disabled', isDisabled);
+        $('#right-winch').attr('disabled', isDisabled);
+        $('#murray').attr('disabled', isDisabled);
+        $('#all-together').attr('disabled', isDisabled);
+    }
+
+    function inOutToggle() {
+    	var isOut = $("#in-out").is(":checked");
+    	console.log("Direction is Out " + isOut);
+    	sendMcpCommand(DIRECTION, isOut);
+
+    }
+
+    function leftWinchToggle() {
+    	var leftWinchOn = $("#left-winch").is(":checked");
+    	console.log("Left winch ON " + leftWinchOn);
+    	sendMcpCommand(LEFT_WINCH, leftWinchOn);
+    }
+    
+    function rightWinchToggle() {
+    	var rightWinchOn = $("#right-winch").is(":checked");
+    	console.log("Right winch ON " + rightWinchOn);
+    	sendMcpCommand(RIGHT_WINCH, rightWinchOn);
+    }
+    
+    function murrayToggle() {
+    	var murrayOn = $("#murray").is(":checked");
+    	console.log("Murray is ON " + murrayOn);
+    	sendMcpCommand(MURRAY, murrayOn)
+    }
+
+    function allTogetherToggle() {
+    	var allTogetherOn = $("#all-together").is(":checked");
+    	$( "#murray" ).prop( "checked", allTogetherOn );
+    	$( "#left-winch" ).prop( "checked", allTogetherOn );
+    	$( "#right-winch" ).prop( "checked", allTogetherOn );
+    	console.log("AllTogether is ON " + allTogetherOn);
+    	leftWinchToggle();
+    	rightWinchToggle();
+    	murrayToggle();
+    }
+	
+	
+	function sendMcpCommand(controlName, state) {
+	  //  $.getJSON("/api/controls?control=" + controlName + "&state=" + state , handleResults);
+	    $.ajax({
+			//  dataType: "json",
+			  url: "/api/controls?control=" + controlName + "&state=" + state,
+			 // data: data,
+			  success: handleResults
+		});
+	}
+	
+	function handleResults(data, status, xhr) {
+		console.log("Got data " + data);
+	}
+</script>
+
+
+  </body>
+</html>
