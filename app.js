@@ -62,8 +62,10 @@ app.get('/api/controls', function(req, res) {
         if (req.query.control == 'direction') {
             for (let component in components) {
                 components[component].direction = state
+                components[component].set()
             }
             console.log('Direction toggled to ' + (state ? 'OUT' : 'IN'))
+            res.send('Direction toggled to ' + (state ? 'OUT' : 'IN'))
         } else {
             console.log('MCP control %o setting to', controlName, state)
             res.send(controlName + ': ' + state)
